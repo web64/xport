@@ -17,8 +17,12 @@ public $db_ignore_a = array(
     'phpmyadmin'
 );
 
+public $root_dir = '';
+
 function __construct( $config)
 {
+    $this->root_dir = substr( dirname(__FILE__)  , 0, -4);
+
     $this->servers = $config['servers'];
     foreach($this->servers as $name => $server)
     {
@@ -56,7 +60,7 @@ function setup()
             $this->servers[$name]['connection'] = $mysqli;
             $this->get_databases( $name );
 
-            $server_dir = dirname(__FILE__) . "/" . $name;
+            $server_dir = $this->root_dir . "/" . $name;
             if ( !file_exists($server_dir) )
                 mkdir( $server_dir );
         }
@@ -67,7 +71,8 @@ function setup()
 
 function import( $dir, $import_server)
 {
-    $d = dir( dirname(__FILE__) . "/" . $dir );
+    $d = dir( $this->root_dir . "/" . $dir );
+
     while ( false !== ($entry = $d->read()) )
     {
         if ( strpos($entry, ".sql") !== false )
@@ -76,7 +81,7 @@ function import( $dir, $import_server)
 
                $s = $this->servers[$import_server];
 
-               $filename = dirname(__FILE__) . "/" . $dir . "/". $entry;
+               $filename = $this->root_dir . "/" . $dir . "/". $entry;
 
                $command = "mysql -h {$s['host']} -u {$s['user']} -p{$s['password']} < $filename ";
                echo "mysql -h {$s['host']} -u {$s['user']} -pPASSWORD < $filename " . PHP_EOL;
